@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             FirebaseMemoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // RegisterScreen()
+                     RegisterScreen()
                     // LoginScreen()
                 }
             }

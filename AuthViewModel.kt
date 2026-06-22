@@ -93,4 +93,9 @@ class AuthViewModel: ViewModel() {
     fun resetState(){
         _uiState.value = AuthUiState.Idle
     }
+
+    // ログアウト
+    fun logout(){
+        auth.signOut()
+    }
 }
