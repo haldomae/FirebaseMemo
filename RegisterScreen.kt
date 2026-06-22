@@ -12,7 +12,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,11 +22,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 
 @Composable
 fun RegisterScreen(
+    // NavHostControllerを受け取れるようにする
+    navController: NavHostController,
     viewModel: AuthViewModel = viewModel()
 ){
     // メールアドレスとパスワードを取得
@@ -34,6 +40,18 @@ fun RegisterScreen(
     // uiStateをComposableで使えるようにする
     // Stateの状態が変わったときに画面を再描画する
     val uiState by viewModel.uiState.collectAsState()
+
+    // uiStateの状態を管理
+    // Firebaseでは新規登録後にはログイン状態となる
+    // ログイン画面同様に直接メモ一覧に遷移させる
+    LaunchedEffect(uiState) {
+        if (uiState is AuthUiState.Success){
+            navController.navigate(Routes.MEMO_LIST){
+                popUpTo(0)
+            }
+            viewModel.resetState()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -97,6 +115,19 @@ fun RegisterScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // ログイン画面への遷移リンク
+        TextButton(
+            onClick = {
+                // popBackStack()
+                // -> 一つ前に戻る
+                // どんどん積み重なっていくので、1つ取り除くようにする
+                navController.popBackStack()
+            }
+        ) {
+            Text(text = "すでにアカウントをお持ちの方はこちら(ログイン)")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
 
         // 現在の状態(uiState)によって表示を切り替える
         // 4つの状態を網羅しないとエラーになる
