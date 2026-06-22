@@ -12,7 +12,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,9 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 
 @Composable
 fun LoginScreen(
+    // NavHostControllerを受け取れるようにする
+    navController: NavHostController,
     // viewModel()を使用することによって
     // この画面専用のAuthViewModelインスタンスが
     // 自動的に作成・管理される
@@ -37,6 +42,19 @@ fun LoginScreen(
     // uiStateをComposableで使えるようにする
     // Stateの状態が変わったときに画面を再描画する
     val uiState by viewModel.uiState.collectAsState()
+
+    // uiStateの変化を監視し、ログイン成功時に画面遷移する
+    LaunchedEffect(uiState) {
+        // ログイン成功
+        if(uiState is AuthUiState.Success){
+            navController.navigate(Routes.MEMO_LIST){
+                // ログイン画面・新規登録画面をバックスタックから削除
+                popUpTo(0)
+            }
+            viewModel.resetState()
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -101,6 +119,21 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // 新規登録へのリンク
+        // TextButton()
+        // -> リンクのようなボタンになる
+        TextButton(
+            onClick = {
+                // 新規登録画面に遷移
+                navController.navigate(Routes.REGISTER)
+            }
+        ) {
+            Text(
+                text = "アカウントをお持ちでない方はこちら(新規登録)"
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
 
         // 現在の状態(uiState)によって表示を切り替える
         // 4つの状態を網羅しないとエラーになる
