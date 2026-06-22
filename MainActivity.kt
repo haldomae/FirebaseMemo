@@ -20,8 +20,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             FirebaseMemoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                     RegisterScreen()
-                    // LoginScreen()
+                    // 個別に画面を表示するのではなく、
+                    // NavHostを呼び出し、画面遷移は任せる
+                    AppNavHost()
                 }
             }
         }
