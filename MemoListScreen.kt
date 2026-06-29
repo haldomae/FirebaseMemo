@@ -1,5 +1,6 @@
 package com.example.firebasememo
 
+import android.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,7 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -48,6 +53,10 @@ fun MemoListScreen(
 
         // 投稿の処理状態(idle,Loading,Success, Error)
         val memoUiState by memoViewModel.uiState.collectAsState()
+
+        // メモ一覧
+        // 値が更新されると画面が再描画される
+        val memos by memoViewModel.memos.collectAsState()
 
         // 投稿成功時の処理
         // 投稿が成功(Success)したら、入力欄を空にする
@@ -118,6 +127,20 @@ fun MemoListScreen(
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
+
+        // メモ表示
+        // LazyColumnは件数多くても画面に表示される分だけ描画する
+        LazyColumn(
+            // weight(1f)
+            // -> ログインボタンより上の残りスペース全て
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // memosの各要素に対して、デザインを適応させる
+            items(memos){ memo ->
+                MemoCard(memo = memo)
+            }
+        }
         // ログアウトボタン
         Button(
             onClick = {
@@ -133,6 +156,36 @@ fun MemoListScreen(
             modifier = Modifier.fillMaxWidth(0.6f)
         ) {
             Text(text = "ログアウト")
+        }
+    }
+}
+
+// メモ1件表示するカード
+@Composable
+fun MemoCard(memo: Memo){
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding()
+        ) {
+            // メモの本文
+            Text(
+                text = memo.text,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            // 日付のフォーマット
+            Text(
+                text = formatTimestamp(memo.createdAt),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
         }
     }
 }
