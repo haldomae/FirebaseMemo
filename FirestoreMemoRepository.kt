@@ -5,7 +5,7 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 
 
-interface FirestoreMemoRepository: MemoRepository {
+class FirestoreMemoRepository: MemoRepository {
     // FireStoreの入口を取得
     private val db = Firebase.firestore
 
