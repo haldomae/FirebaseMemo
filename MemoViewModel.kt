@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 // メモ投稿機能を扱うViewModel
@@ -21,6 +23,26 @@ class MemoViewModel(
     = MutableStateFlow<MemoUiState>(MemoUiState.Idle)
     val uiState: StateFlow<MemoUiState>
     = _uiState.asStateFlow()
+
+    // 現在ログイン中のユーザ
+    private val currentUserId: String
+    = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+    // メモをリアルタイムで受け取るStateFlow
+    val memos: StateFlow<List<Memo>>
+    = repository.observeMemos(currentUserId)
+        .stateIn(
+            // 常に最新の値を持つようにする
+            scope = viewModelScope,
+            // このViewModelが生きている間だけFlowを購読
+            // 画面が閉じたら自動的に読むことをやめる
+            // StateFlowを読んでいるComposeが1つもなくなってから
+            // 5秒後にFlowの収集を停止する
+            started = SharingStarted
+                .WhileSubscribed(5000),
+            // Firebaseから最初のデータが届く前に画面が表示される瞬間の初期値
+            initialValue = emptyList()
+        )
 
     // メモ投稿
     fun postMemo(text: String){

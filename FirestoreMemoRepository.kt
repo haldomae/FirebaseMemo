@@ -4,7 +4,9 @@ import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 
@@ -18,7 +20,7 @@ class FirestoreMemoRepository: MemoRepository {
     }
 
     // 指定ユーザのメモ一覧をリアルタイムで監視する
-    override fun observeMemos(userId: String): Flow<List<Memo>> {
+    override fun observeMemos(userId: String): Flow<List<Memo>> = callbackFlow {
         val listener = db.collection("memos")
             // ユーザIDで絞り込み
             .whereEqualTo(
